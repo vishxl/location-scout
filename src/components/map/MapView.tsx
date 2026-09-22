@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
-import maplibregl, { type Map as MLMap } from "maplibre-gl";
+import * as maplibregl from "maplibre-gl";
+import type { Map as MLMap, MapMouseEvent, MapGeoJSONFeature } from "maplibre-gl";
 import "maplibre-gl/dist/maplibre-gl.css";
 import type { GeoJsonGeometry } from "@/lib/nextbillion/types";
 
@@ -102,7 +103,7 @@ export default function MapView({ center, markers, polygons, fitKey }: Props) {
         },
       });
 
-      map.on("click", "marker-circle", (e) => {
+      map.on("click", "marker-circle", (e: MapMouseEvent & { features?: MapGeoJSONFeature[] }) => {
         const f = e.features?.[0];
         if (!f) return;
         const p = f.properties as Record<string, string>;
