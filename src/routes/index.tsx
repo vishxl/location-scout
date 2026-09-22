@@ -94,7 +94,7 @@ function Groundwork() {
         });
         patch(key, { loading: false, analysis: result });
         setLayers((prev) => {
-          const next = { ...prev, competitors: prev["competitors"] ?? true };
+          const next: Record<string, boolean> = { ...prev, competitors: prev["competitors"] ?? true };
           for (const c of result.categories) if (next[c.id] === undefined) next[c.id] = true;
           return next;
         });
