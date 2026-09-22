@@ -5,6 +5,8 @@
 
 const BASE = "https://api.nextbillion.io";
 
+export type GeoJsonGeometry = { type: string; coordinates: unknown };
+
 export type LatLng = { lat: number; lng: number };
 
 export type GeocodeResult = {
@@ -30,7 +32,7 @@ export type RouteResult = {
 export type IsochroneResult = {
   minutes: number;
   /** GeoJSON polygon geometry */
-  geometry: GeoJSON.Geometry | null;
+  geometry: GeoJsonGeometry | null;
 };
 
 export function getApiKey(): string | null {
@@ -166,8 +168,8 @@ export async function getIsochrone(opts: {
   mode?: string;
 }): Promise<IsochroneResult> {
   const data = await nbFetch<{
-    features?: Array<{ geometry?: GeoJSON.Geometry }>;
-    polygons?: Array<{ geometry?: GeoJSON.Geometry }>;
+    features?: Array<{ geometry?: GeoJsonGeometry }>;
+    polygons?: Array<{ geometry?: GeoJsonGeometry }>;
   }>("/isochrone/json", {
     coordinates: `${opts.at.lat},${opts.at.lng}`,
     contours_minutes: opts.minutes,
