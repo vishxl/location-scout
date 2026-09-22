@@ -35,15 +35,29 @@ const STYLE: maplibregl.StyleSpecification = {
     basemap: {
       type: "raster",
       tiles: [
-        "https://a.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png",
-        "https://b.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png",
-        "https://c.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}@2x.png",
+        "https://a.tile.openstreetmap.org/{z}/{x}/{y}.png",
+        "https://b.tile.openstreetmap.org/{z}/{x}/{y}.png",
+        "https://c.tile.openstreetmap.org/{z}/{x}/{y}.png",
       ],
       tileSize: 256,
-      attribution: "© OpenStreetMap contributors © CARTO · routing & places: NextBillion.ai",
+      maxzoom: 19,
+      attribution: "© OpenStreetMap contributors · routing & places: NextBillion.ai",
     },
   },
-  layers: [{ id: "basemap", type: "raster", source: "basemap" }],
+  layers: [
+    { id: "canvas", type: "background", paint: { "background-color": "#0d1014" } },
+    {
+      id: "basemap",
+      type: "raster",
+      source: "basemap",
+      paint: {
+        "raster-opacity": 0.55,
+        "raster-saturation": -0.65,
+        "raster-contrast": 0.1,
+        "raster-brightness-max": 0.85,
+      },
+    },
+  ],
 };
 
 export default function MapView({ center, markers, polygons, fitKey }: Props) {
