@@ -33,7 +33,7 @@ function SectionTitle({ children, note }: { children: React.ReactNode; note?: st
   );
 }
 
-function Stat({ label, value, sub }: { label: string; value: string; sub?: string }) {
+function Stat({ label, value, sub }: { label: string; value: string; sub?: string | undefined }) {
   return (
     <div className="border-b border-r border-border px-4 py-3">
       <div className="label-xs">{label}</div>
