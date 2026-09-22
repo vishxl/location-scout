@@ -5,7 +5,8 @@
 
 const BASE = "https://api.nextbillion.io";
 
-export type GeoJsonGeometry = { type: string; coordinates: unknown };
+export type GeoJsonCoords = number[] | number[][] | number[][][] | number[][][][];
+export type GeoJsonGeometry = { type: string; coordinates: GeoJsonCoords };
 
 export type LatLng = { lat: number; lng: number };
 
