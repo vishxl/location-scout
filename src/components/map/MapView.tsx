@@ -145,8 +145,12 @@ export default function MapView({ center, markers, polygons, fitKey, pickMode, o
           )
           .addTo(map);
       });
-      map.on("mouseenter", "marker-circle", () => (map.getCanvas().style.cursor = "pointer"));
-      map.on("mouseleave", "marker-circle", () => (map.getCanvas().style.cursor = ""));
+      map.on("mouseenter", "marker-circle", () => {
+        if (!pickRef.current.pickMode) map.getCanvas().style.cursor = "pointer";
+      });
+      map.on("mouseleave", "marker-circle", () => {
+        if (!pickRef.current.pickMode) map.getCanvas().style.cursor = "";
+      });
 
       readyRef.current = true;
       sync(map, markers, polygons);
