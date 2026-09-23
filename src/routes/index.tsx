@@ -3,7 +3,7 @@ import { ClientOnly } from "@tanstack/react-router";
 import { Suspense, lazy, useCallback, useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
-import { Loader2, Play, Plus, Columns3, FileText, KeyRound } from "lucide-react";
+import { Loader2, Play, Plus, Columns3, FileText, KeyRound, MapPin } from "lucide-react";
 
 import {
   analyzeLocation,
