@@ -14,10 +14,14 @@ export const analyzeLocation = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) =>
     z
       .object({
-        address: z.string().min(2),
+        address: z.string().default(""),
+        coords: latLng.optional(),
         businessTypeId: z.string(),
         customLabel: z.string().optional(),
         mode: z.string().default("car"),
+      })
+      .refine((v) => v.coords !== undefined || v.address.trim().length >= 2, {
+        message: "Provide an address or a map point",
       })
       .parse(input),
   )
