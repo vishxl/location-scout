@@ -62,10 +62,14 @@ const STYLE: maplibregl.StyleSpecification = {
   ],
 };
 
-export default function MapView({ center, markers, polygons, fitKey }: Props) {
+export default function MapView({ center, markers, polygons, fitKey, pickMode, onPick }: Props) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<MLMap | null>(null);
   const readyRef = useRef(false);
+  const pickRef = useRef<{ pickMode: boolean; onPick?: (at: { lat: number; lng: number }) => void }>({
+    pickMode: false,
+  });
+  pickRef.current = { pickMode: !!pickMode, onPick };
 
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
