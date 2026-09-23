@@ -402,9 +402,26 @@ function Groundwork() {
         <main className="relative min-w-0 flex-1">
           <ClientOnly fallback={<div className="h-full w-full bg-background" />}>
             <Suspense fallback={<div className="h-full w-full bg-background" />}>
-              <MapView center={center} markers={markers} polygons={polygons} fitKey={fitKey} />
+              <MapView
+                center={center}
+                markers={markers}
+                polygons={polygons}
+                fitKey={fitKey}
+                pickMode={pickMode}
+                onPick={(at) => {
+                  setPickMode(false);
+                  patch(activeKey, { address: `${at.lat.toFixed(5)}, ${at.lng.toFixed(5)}` });
+                  void analyze(activeKey, at);
+                }}
+              />
             </Suspense>
           </ClientOnly>
+          {pickMode ? (
+            <div className="pointer-events-none absolute left-1/2 top-3 -translate-x-1/2 border border-primary/50 bg-background/90 px-3 py-1.5 text-[12px] text-primary backdrop-blur">
+              Click anywhere on the map to set Location {activeKey}
+            </div>
+          ) : null}
+
           <div className="pointer-events-none absolute left-3 top-3 space-y-1 border border-border bg-background/85 px-3 py-2 backdrop-blur">
             <div className="label-xs">Legend</div>
             <LegendRow color={CANDIDATE_COLORS.A} label="Your location" />
