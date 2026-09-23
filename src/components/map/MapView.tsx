@@ -27,6 +27,8 @@ type Props = {
   markers: MapMarker[];
   polygons: MapPolygon[];
   fitKey?: string;
+  pickMode?: boolean;
+  onPick?: (at: { lat: number; lng: number }) => void;
 };
 
 const STYLE: maplibregl.StyleSpecification = {
