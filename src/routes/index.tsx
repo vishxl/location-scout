@@ -68,6 +68,7 @@ function Groundwork() {
   const [layers, setLayers] = useState<Record<string, boolean>>({ competitors: true });
   const [activeKey, setActiveKey] = useState<CandidateKey>("A");
   const [fitKey, setFitKey] = useState("init");
+  const [pickMode, setPickMode] = useState(false);
 
   const [candidates, setCandidates] = useState<Candidate[]>([emptyCandidate("A", DEMO_ADDRESS)]);
   const active = candidates.find((c) => c.key === activeKey) ?? candidates[0]!;
