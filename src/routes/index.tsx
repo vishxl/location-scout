@@ -318,6 +318,21 @@ function Groundwork() {
           {active?.loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Play className="h-3.5 w-3.5" />}
           Analyze location
         </button>
+        <button
+          onClick={() => setPickMode((v) => !v)}
+          disabled={!isConfigured}
+          title="Click a point on the map to use it as this location"
+          className={cn(
+            "flex h-8 items-center gap-1.5 border px-2.5 font-mono text-[11px] uppercase tracking-[0.12em] disabled:opacity-40",
+            pickMode
+              ? "border-primary bg-primary/15 text-primary"
+              : "border-border bg-surface text-muted-foreground hover:border-border-strong hover:text-foreground",
+          )}
+        >
+          <MapPin className="h-3.5 w-3.5" />
+          {pickMode ? "Click the map" : "Drop pin"}
+        </button>
+
 
         {/* candidate switcher */}
         <div className="flex items-center gap-1">
