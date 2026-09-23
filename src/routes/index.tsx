@@ -79,20 +79,22 @@ function Groundwork() {
   const isConfigured = configured.data?.configured ?? false;
 
   const analyze = useCallback(
-    async (key: CandidateKey) => {
+    async (key: CandidateKey, coords?: { lat: number; lng: number }) => {
       const cand = candidates.find((c) => c.key === key);
-      if (!cand || !cand.address.trim()) return;
+      if (!cand) return;
+      if (!coords && !cand.address.trim()) return;
       patch(key, { loading: true, error: null, analysis: null, catchment: null, competitorZones: [] });
       try {
         const result = await runAnalyze({
           data: {
-            address: cand.address.trim(),
+            address: coords ? "" : cand.address.trim(),
+            ...(coords ? { coords } : {}),
             businessTypeId,
             customLabel,
             mode,
           },
         });
-        patch(key, { loading: false, analysis: result });
+        patch(key, { loading: false, analysis: result, address: result.location.address || cand.address });
         setLayers((prev) => {
           const next: Record<string, boolean> = { ...prev, competitors: prev["competitors"] ?? true };
           for (const c of result.categories) if (next[c.id] === undefined) next[c.id] = true;
