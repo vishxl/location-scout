@@ -3,7 +3,7 @@ import { ClientOnly } from "@tanstack/react-router";
 import { Suspense, lazy, useCallback, useEffect, useMemo, useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { useQuery } from "@tanstack/react-query";
-import { Loader2, Play, Plus, Columns3, FileText, KeyRound } from "lucide-react";
+import { Loader2, Play, Plus, Columns3, FileText, KeyRound, MapPin } from "lucide-react";
 
 import {
   analyzeLocation,
@@ -68,6 +68,7 @@ function Groundwork() {
   const [layers, setLayers] = useState<Record<string, boolean>>({ competitors: true });
   const [activeKey, setActiveKey] = useState<CandidateKey>("A");
   const [fitKey, setFitKey] = useState("init");
+  const [pickMode, setPickMode] = useState(false);
 
   const [candidates, setCandidates] = useState<Candidate[]>([emptyCandidate("A", DEMO_ADDRESS)]);
   const active = candidates.find((c) => c.key === activeKey) ?? candidates[0]!;
@@ -79,20 +80,22 @@ function Groundwork() {
   const isConfigured = configured.data?.configured ?? false;
 
   const analyze = useCallback(
-    async (key: CandidateKey) => {
+    async (key: CandidateKey, coords?: { lat: number; lng: number }) => {
       const cand = candidates.find((c) => c.key === key);
-      if (!cand || !cand.address.trim()) return;
+      if (!cand) return;
+      if (!coords && !cand.address.trim()) return;
       patch(key, { loading: true, error: null, analysis: null, catchment: null, competitorZones: [] });
       try {
         const result = await runAnalyze({
           data: {
-            address: cand.address.trim(),
+            address: coords ? "" : cand.address.trim(),
+            ...(coords ? { coords } : {}),
             businessTypeId,
             customLabel,
             mode,
           },
         });
-        patch(key, { loading: false, analysis: result });
+        patch(key, { loading: false, analysis: result, address: result.location.address || cand.address });
         setLayers((prev) => {
           const next: Record<string, boolean> = { ...prev, competitors: prev["competitors"] ?? true };
           for (const c of result.categories) if (next[c.id] === undefined) next[c.id] = true;
@@ -298,7 +301,7 @@ function Groundwork() {
           </div>
         ) : null}
         <div className="flex min-w-[260px] flex-1 flex-col gap-1">
-          <label className="label-xs">Location {active?.key}</label>
+          <label className="label-xs">Location {active?.key} — type an address or drop a pin</label>
           <input
             value={active?.address ?? ""}
             onChange={(e) => patch(active!.key, { address: e.target.value })}
@@ -315,6 +318,21 @@ function Groundwork() {
           {active?.loading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : <Play className="h-3.5 w-3.5" />}
           Analyze location
         </button>
+        <button
+          onClick={() => setPickMode((v) => !v)}
+          disabled={!isConfigured}
+          title="Click a point on the map to use it as this location"
+          className={cn(
+            "flex h-8 items-center gap-1.5 border px-2.5 font-mono text-[11px] uppercase tracking-[0.12em] disabled:opacity-40",
+            pickMode
+              ? "border-primary bg-primary/15 text-primary"
+              : "border-border bg-surface text-muted-foreground hover:border-border-strong hover:text-foreground",
+          )}
+        >
+          <MapPin className="h-3.5 w-3.5" />
+          {pickMode ? "Click the map" : "Drop pin"}
+        </button>
+
 
         {/* candidate switcher */}
         <div className="flex items-center gap-1">
@@ -384,9 +402,26 @@ function Groundwork() {
         <main className="relative min-w-0 flex-1">
           <ClientOnly fallback={<div className="h-full w-full bg-background" />}>
             <Suspense fallback={<div className="h-full w-full bg-background" />}>
-              <MapView center={center} markers={markers} polygons={polygons} fitKey={fitKey} />
+              <MapView
+                center={center}
+                markers={markers}
+                polygons={polygons}
+                fitKey={fitKey}
+                pickMode={pickMode}
+                onPick={(at) => {
+                  setPickMode(false);
+                  patch(activeKey, { address: `${at.lat.toFixed(5)}, ${at.lng.toFixed(5)}` });
+                  void analyze(activeKey, at);
+                }}
+              />
             </Suspense>
           </ClientOnly>
+          {pickMode ? (
+            <div className="pointer-events-none absolute left-1/2 top-3 -translate-x-1/2 border border-primary/50 bg-background/90 px-3 py-1.5 text-[12px] text-primary backdrop-blur">
+              Click anywhere on the map to set Location {activeKey}
+            </div>
+          ) : null}
+
           <div className="pointer-events-none absolute left-3 top-3 space-y-1 border border-border bg-background/85 px-3 py-2 backdrop-blur">
             <div className="label-xs">Legend</div>
             <LegendRow color={CANDIDATE_COLORS.A} label="Your location" />

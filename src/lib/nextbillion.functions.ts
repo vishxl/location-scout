@@ -14,10 +14,14 @@ export const analyzeLocation = createServerFn({ method: "POST" })
   .inputValidator((input: unknown) =>
     z
       .object({
-        address: z.string().min(2),
+        address: z.string().default(""),
+        coords: latLng.optional(),
         businessTypeId: z.string(),
         customLabel: z.string().optional(),
         mode: z.string().default("car"),
+      })
+      .refine((v) => v.coords !== undefined || v.address.trim().length >= 2, {
+        message: "Provide an address or a map point",
       })
       .parse(input),
   )
@@ -27,7 +31,14 @@ export const analyzeLocation = createServerFn({ method: "POST" })
 
     const config = resolveBusinessConfig(data.businessTypeId, data.customLabel);
 
-    const geo = await nb.geocode(data.address);
+    const geo = data.coords
+      ? ((await nb.reverseGeocode(data.coords).catch(() => null)) ?? {
+          label: "Dropped pin",
+          address: `${data.coords.lat.toFixed(5)}, ${data.coords.lng.toFixed(5)}`,
+          lat: data.coords.lat,
+          lng: data.coords.lng,
+        })
+      : await nb.geocode(data.address);
     if (!geo) throw new Error("ADDRESS_NOT_RESOLVED");
     const at = { lat: geo.lat, lng: geo.lng };
 

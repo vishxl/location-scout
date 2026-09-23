@@ -27,6 +27,8 @@ type Props = {
   markers: MapMarker[];
   polygons: MapPolygon[];
   fitKey?: string;
+  pickMode?: boolean;
+  onPick?: (at: { lat: number; lng: number }) => void;
 };
 
 const STYLE: maplibregl.StyleSpecification = {
@@ -60,10 +62,14 @@ const STYLE: maplibregl.StyleSpecification = {
   ],
 };
 
-export default function MapView({ center, markers, polygons, fitKey }: Props) {
+export default function MapView({ center, markers, polygons, fitKey, pickMode, onPick }: Props) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<MLMap | null>(null);
   const readyRef = useRef(false);
+  const pickRef = useRef<{ pickMode: boolean; onPick?: ((at: { lat: number; lng: number }) => void) | undefined }>({
+    pickMode: false,
+  });
+  pickRef.current = { pickMode: !!pickMode, onPick };
 
   useEffect(() => {
     if (!containerRef.current || mapRef.current) return;
@@ -117,7 +123,13 @@ export default function MapView({ center, markers, polygons, fitKey }: Props) {
         },
       });
 
+      map.on("click", (e: MapMouseEvent) => {
+        if (!pickRef.current.pickMode) return;
+        pickRef.current.onPick?.({ lat: e.lngLat.lat, lng: e.lngLat.lng });
+      });
+
       map.on("click", "marker-circle", (e: MapMouseEvent & { features?: MapGeoJSONFeature[] }) => {
+        if (pickRef.current.pickMode) return;
         const f = e.features?.[0];
         if (!f) return;
         const p = f.properties as Record<string, string>;
@@ -133,8 +145,12 @@ export default function MapView({ center, markers, polygons, fitKey }: Props) {
           )
           .addTo(map);
       });
-      map.on("mouseenter", "marker-circle", () => (map.getCanvas().style.cursor = "pointer"));
-      map.on("mouseleave", "marker-circle", () => (map.getCanvas().style.cursor = ""));
+      map.on("mouseenter", "marker-circle", () => {
+        if (!pickRef.current.pickMode) map.getCanvas().style.cursor = "pointer";
+      });
+      map.on("mouseleave", "marker-circle", () => {
+        if (!pickRef.current.pickMode) map.getCanvas().style.cursor = "";
+      });
 
       readyRef.current = true;
       sync(map, markers, polygons);
@@ -160,6 +176,12 @@ export default function MapView({ center, markers, polygons, fitKey }: Props) {
     map.easeTo({ center: [center.lng, center.lat], zoom: Math.max(map.getZoom(), 12.5), duration: 700 });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fitKey]);
+
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+    map.getCanvas().style.cursor = pickMode ? "crosshair" : "";
+  }, [pickMode]);
 
   return <div ref={containerRef} className="h-full w-full" />;
 }
