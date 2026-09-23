@@ -301,7 +301,7 @@ function Groundwork() {
           </div>
         ) : null}
         <div className="flex min-w-[260px] flex-1 flex-col gap-1">
-          <label className="label-xs">Location {active?.key}</label>
+          <label className="label-xs">Location {active?.key} — type an address or drop a pin</label>
           <input
             value={active?.address ?? ""}
             onChange={(e) => patch(active!.key, { address: e.target.value })}
