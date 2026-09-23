@@ -177,6 +177,12 @@ export default function MapView({ center, markers, polygons, fitKey, pickMode, o
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fitKey]);
 
+  useEffect(() => {
+    const map = mapRef.current;
+    if (!map) return;
+    map.getCanvas().style.cursor = pickMode ? "crosshair" : "";
+  }, [pickMode]);
+
   return <div ref={containerRef} className="h-full w-full" />;
 }
 
