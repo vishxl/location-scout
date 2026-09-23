@@ -66,7 +66,7 @@ export default function MapView({ center, markers, polygons, fitKey, pickMode, o
   const containerRef = useRef<HTMLDivElement | null>(null);
   const mapRef = useRef<MLMap | null>(null);
   const readyRef = useRef(false);
-  const pickRef = useRef<{ pickMode: boolean; onPick?: (at: { lat: number; lng: number }) => void }>({
+  const pickRef = useRef<{ pickMode: boolean; onPick?: ((at: { lat: number; lng: number }) => void) | undefined }>({
     pickMode: false,
   });
   pickRef.current = { pickMode: !!pickMode, onPick };
