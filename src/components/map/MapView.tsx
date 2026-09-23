@@ -123,7 +123,13 @@ export default function MapView({ center, markers, polygons, fitKey, pickMode, o
         },
       });
 
+      map.on("click", (e: MapMouseEvent) => {
+        if (!pickRef.current.pickMode) return;
+        pickRef.current.onPick?.({ lat: e.lngLat.lat, lng: e.lngLat.lng });
+      });
+
       map.on("click", "marker-circle", (e: MapMouseEvent & { features?: MapGeoJSONFeature[] }) => {
+        if (pickRef.current.pickMode) return;
         const f = e.features?.[0];
         if (!f) return;
         const p = f.properties as Record<string, string>;
